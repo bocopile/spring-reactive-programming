@@ -5,12 +5,15 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 
 import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.Executors;
 
 
 /**
@@ -66,6 +69,24 @@ public class DemoApplication {
 			}
 			return "OK";
 		}
+
+		@GetMapping("/emitter")
+		public ResponseBodyEmitter emitter() throws InterruptedException{
+			ResponseBodyEmitter emitter = new ResponseBodyEmitter();
+
+			Executors.newSingleThreadExecutor().submit(()->{
+				try {
+					for (int i = 1; i <= 50; i++) {
+						emiiter.send("<p>Stream " + i + "</p>");
+						Thread.sleep(2000);
+					}
+				}catch (Exception e){
+
+				}
+			});
+
+
+		}*/
 
 	}
 
