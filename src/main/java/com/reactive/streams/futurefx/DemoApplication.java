@@ -9,7 +9,10 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.concurrent.ListenableFuture;
 
 import java.util.concurrent.Future;
 
@@ -18,16 +21,28 @@ import java.util.concurrent.Future;
  */
 @SpringBootApplication
 @Slf4j
+@EnableAsync
 public class DemoApplication {
 
 	@Component
 	public static class MyService{
-		@Async
-		public Future<String> hello() throws InterruptedException {
+		@Async(value="tp")
+		public ListenableFuture<String> hello() throws InterruptedException {
 			log.debug("hello()");
 			Thread.sleep(1000);
 			return new AsyncResult<>("hello");
 		}
+	}
+
+	@Bean
+	ThreadPoolTaskExecutor tp() {
+		ThreadPoolTaskExecutor te = new ThreadPoolTaskExecutor();
+		te.setCorePoolSize(10); // 기본 Thread 수 (1)
+		te.setMaxPoolSize(100); // 최대 Thread 수 -> QUERE가 넘치는 경우 실행
+		te.setQueueCapacity(200); // QUEUE 수(2)
+		te.setThreadNamePrefix("myThread");
+		te.initialize();
+		return te;
 	}
 
 	public static void main(String[] args) {
